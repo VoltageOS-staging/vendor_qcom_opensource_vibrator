@@ -112,7 +112,7 @@ InputFFDevice::InputFFDevice()
 
     dp = opendir(INPUT_DIR);
     if (!dp) {
-        ALOGE("open %s failed, errno = %d", INPUT_DIR, errno);
+        //ALOGE("open %s failed, errno = %d", INPUT_DIR, errno);
         return;
     }
 
@@ -126,13 +126,13 @@ InputFFDevice::InputFFDevice()
         snprintf(devicename, PATH_MAX, "%s%s", INPUT_DIR, dir->d_name);
         fd = TEMP_FAILURE_RETRY(open(devicename, O_RDWR));
         if (fd < 0) {
-            ALOGE("open %s failed, errno = %d", devicename, errno);
+            //ALOGE("open %s failed, errno = %d", devicename, errno);
             continue;
         }
 
         ret = TEMP_FAILURE_RETRY(ioctl(fd, EVIOCGNAME(sizeof(name)), name));
         if (ret == -1) {
-            ALOGE("get input device name %s failed, errno = %d\n", devicename, errno);
+            //ALOGE("get input device name %s failed, errno = %d\n", devicename, errno);
             close(fd);
             continue;
         }
@@ -141,7 +141,7 @@ InputFFDevice::InputFFDevice()
                 && strcmp(name, "aw8624_haptic")
                 && strcmp(name, "aw8695_haptic")
                 && strcmp(name, "aw8697_haptic")) {
-            ALOGD("not a supported haptics device\n");
+            //ALOGD("not a supported haptics device\n");
             close(fd);
             continue;
         }
@@ -149,7 +149,7 @@ InputFFDevice::InputFFDevice()
         ALOGI("%s is detected at %s\n", name, devicename);
         ret = TEMP_FAILURE_RETRY(ioctl(fd, EVIOCGBIT(EV_FF, sizeof(ffBitmask)), ffBitmask));
         if (ret == -1) {
-            ALOGE("ioctl failed, errno = %d", errno);
+            //ALOGE("ioctl failed, errno = %d", errno);
             close(fd);
             continue;
         }
@@ -231,7 +231,7 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
         if (mCurrAppId != INVALID_VALUE) {
             ret = TEMP_FAILURE_RETRY(ioctl(mVibraFd, EVIOCRMFF, mCurrAppId));
             if (ret == -1) {
-                ALOGE("ioctl EVIOCRMFF failed, errno = %d", -errno);
+                //ALOGE("ioctl EVIOCRMFF failed, errno = %d", -errno);
                 goto errout;
             }
             mCurrAppId = INVALID_VALUE;
@@ -263,7 +263,7 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
 
         ret = TEMP_FAILURE_RETRY(ioctl(mVibraFd, EVIOCSFF, &effect));
         if (ret == -1) {
-            ALOGE("ioctl EVIOCSFF failed, errno = %d", -errno);
+            //ALOGE("ioctl EVIOCSFF failed, errno = %d", -errno);
             goto errout;
         }
 
@@ -283,16 +283,16 @@ int InputFFDevice::play(int effectId, uint32_t timeoutMs, long *playLengthMs) {
         play.time.tv_usec = 0;
         ret = TEMP_FAILURE_RETRY(write(mVibraFd, (const void*)&play, sizeof(play)));
         if (ret == -1) {
-            ALOGE("write failed, errno = %d\n", -errno);
+            //ALOGE("write failed, errno = %d\n", -errno);
             ret = TEMP_FAILURE_RETRY(ioctl(mVibraFd, EVIOCRMFF, mCurrAppId));
             if (ret == -1)
-                ALOGE("ioctl EVIOCRMFF failed, errno = %d", -errno);
+                //ALOGE("ioctl EVIOCRMFF failed, errno = %d", -errno);
             goto errout;
         }
     } else if (mCurrAppId != INVALID_VALUE) {
         ret = TEMP_FAILURE_RETRY(ioctl(mVibraFd, EVIOCRMFF, mCurrAppId));
         if (ret == -1) {
-            ALOGE("ioctl EVIOCRMFF failed, errno = %d", -errno);
+            //ALOGE("ioctl EVIOCRMFF failed, errno = %d", -errno);
             goto errout;
         }
         mCurrAppId = INVALID_VALUE;
@@ -328,7 +328,7 @@ int InputFFDevice::setAmplitude(uint8_t amplitude) {
 
     ret = TEMP_FAILURE_RETRY(write(mVibraFd, &ie, sizeof(ie)));
     if (ret == -1) {
-        ALOGE("write FF_GAIN failed, errno = %d", -errno);
+        //ALOGE("write FF_GAIN failed, errno = %d", -errno);
         return ret;
     }
 
@@ -338,7 +338,7 @@ int InputFFDevice::setAmplitude(uint8_t amplitude) {
 
 int InputFFDevice::playEffect(int effectId, EffectStrength es, long *playLengthMs) {
     if (effectId > MAX_PATTERN_ID) {
-        ALOGE("effect id %d exceeds %d", effectId, MAX_PATTERN_ID);
+        //ALOGE("effect id %d exceeds %d", effectId, MAX_PATTERN_ID);
         return -1;
     }
 
@@ -364,7 +364,7 @@ int InputFFDevice::playPrimitive(int primitiveId, float amplitude, long *playLen
     int ret = 0;
 
     if (primitiveId > MAX_PATTERN_ID) {
-        ALOGE("primitive id %d exceeds %d", primitiveId, MAX_PATTERN_ID);
+        //ALOGE("primitive id %d exceeds %d", primitiveId, MAX_PATTERN_ID);
         return -1;
     }
 
@@ -389,7 +389,7 @@ LedVibratorDevice::LedVibratorDevice() {
     snprintf(devicename, sizeof(devicename), "%s/%s", LED_DEVICE, "activate");
     fd = TEMP_FAILURE_RETRY(open(devicename, O_RDWR));
     if (fd < 0) {
-        ALOGE("open %s failed, errno = %d", devicename, errno);
+        //ALOGE("open %s failed, errno = %d", devicename, errno);
         return;
     }
 
@@ -402,7 +402,7 @@ int LedVibratorDevice::write_value(const char *file, const char *value) {
 
     fd = TEMP_FAILURE_RETRY(open(file, O_WRONLY));
     if (fd < 0) {
-        ALOGE("open %s failed, errno = %d", file, errno);
+        //ALOGE("open %s failed, errno = %d", file, errno);
         return -errno;
     }
 
@@ -449,7 +449,7 @@ int LedVibratorDevice::on(int32_t timeoutMs) {
     return 0;
 
 error:
-    ALOGE("Failed to turn on vibrator ret: %d\n", ret);
+    //ALOGE("Failed to turn on vibrator ret: %d\n", ret);
     return ret;
 }
 
@@ -475,13 +475,13 @@ Vibrator::Vibrator() {
         return;
 
     if (pipe(pipefd)) {
-        ALOGE("Failed to get pipefd error=%d", errno);
+        //ALOGE("Failed to get pipefd error=%d", errno);
         return;
     }
 
     epollfd = epoll_create1(0);
     if (epollfd < 0) {
-        ALOGE("Failed to create epoll fd error=%d", errno);
+        //ALOGE("Failed to create epoll fd error=%d", errno);
         goto pipefd_close;
     }
 
@@ -489,7 +489,7 @@ Vibrator::Vibrator() {
     ev.data.fd = pipefd[0];
 
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, pipefd[0], &ev) == -1) {
-        ALOGE("Failed to add pipefd to epoll ctl error=%d", errno);
+        //ALOGE("Failed to add pipefd to epoll ctl error=%d", errno);
         goto epollfd_close;
     }
 
@@ -518,7 +518,7 @@ ndk::ScopedAStatus Vibrator::getCapabilities(int32_t* _aidl_return) {
     *_aidl_return = IVibrator::CAP_ON_CALLBACK;
 
     if (ledVib.mDetected) {
-        ALOGD("QTI Vibrator reporting capabilities: %d", *_aidl_return);
+        //ALOGD("QTI Vibrator reporting capabilities: %d", *_aidl_return);
         return ndk::ScopedAStatus::ok();
     }
 
@@ -533,7 +533,7 @@ ndk::ScopedAStatus Vibrator::getCapabilities(int32_t* _aidl_return) {
     if (ff.mSupportExternalControl)
         *_aidl_return |= IVibrator::CAP_EXTERNAL_CONTROL;
 
-    ALOGD("QTI Vibrator reporting capabilities: %d", *_aidl_return);
+    //ALOGD("QTI Vibrator reporting capabilities: %d", *_aidl_return);
     return ndk::ScopedAStatus::ok();
 }
 
@@ -541,7 +541,7 @@ ndk::ScopedAStatus Vibrator::off() {
     int ret;
     int composeEven = STOP_COMPOSE;
 
-    ALOGD("QTI Vibrator off");
+    //ALOGD("QTI Vibrator off");
     if (ledVib.mDetected)
         ret = ledVib.off();
     else
@@ -552,7 +552,7 @@ ndk::ScopedAStatus Vibrator::off() {
     if (inComposition) {
         ret = write(pipefd[1], &composeEven, sizeof(composeEven));
         if (ret < 0) {
-            ALOGE("Failed to send STOP_COMPOSE event");
+            //ALOGE("Failed to send STOP_COMPOSE event");
             return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_SERVICE_SPECIFIC));
         }
     }
@@ -564,7 +564,7 @@ ndk::ScopedAStatus Vibrator::on(int32_t timeoutMs,
                                 const std::shared_ptr<IVibratorCallback>& callback) {
     int ret;
 
-    ALOGD("Vibrator on for timeoutMs: %d", timeoutMs);
+    //ALOGD("Vibrator on for timeoutMs: %d", timeoutMs);
     if (ledVib.mDetected)
         ret = ledVib.on(timeoutMs);
     else
@@ -575,11 +575,11 @@ ndk::ScopedAStatus Vibrator::on(int32_t timeoutMs,
 
     if (callback != nullptr) {
         std::thread([=] {
-            ALOGD("Starting on on another thread");
+            //ALOGD("Starting on on another thread");
             usleep(timeoutMs * 1000);
-            ALOGD("Notifying on complete");
+            //ALOGD("Notifying on complete");
             if (!callback->onComplete().isOk()) {
-                ALOGE("Failed to call onComplete");
+                //ALOGE("Failed to call onComplete");
             }
         }).detach();
     }
@@ -594,7 +594,7 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength es, const std
     if (ledVib.mDetected)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
 
-    ALOGD("Vibrator perform effect %d", effect);
+    //ALOGD("Vibrator perform effect %d", effect);
     if (Offload.mEnabled == 1) {
         if ((effect < Effect::CLICK) ||
             ((effect > Effect::HEAVY_CLICK) && (effect < Effect::RINGTONE_12)) ||
@@ -615,9 +615,9 @@ ndk::ScopedAStatus Vibrator::perform(Effect effect, EffectStrength es, const std
 
     if (callback != nullptr) {
         std::thread([=] {
-            ALOGD("Starting perform on another thread");
+            //ALOGD("Starting perform on another thread");
             usleep(playLengthMs * 1000);
-            ALOGD("Notifying perform complete");
+            //ALOGD("Notifying perform complete");
             callback->onComplete();
         }).detach();
     }
@@ -648,7 +648,7 @@ ndk::ScopedAStatus Vibrator::setAmplitude(float amplitude) {
     if (ledVib.mDetected)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
 
-    ALOGD("Vibrator set amplitude: %f", amplitude);
+    //ALOGD("Vibrator set amplitude: %f", amplitude);
 
     if (amplitude <= 0.0f || amplitude > 1.0f)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_ILLEGAL_ARGUMENT));
@@ -668,7 +668,7 @@ ndk::ScopedAStatus Vibrator::setExternalControl(bool enabled) {
     if (ledVib.mDetected)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
 
-    ALOGD("Vibrator set external control: %d", enabled);
+    //ALOGD("Vibrator set external control: %d", enabled);
     if (!ff.mSupportExternalControl)
         return ndk::ScopedAStatus(AStatus_fromExceptionCode(EX_UNSUPPORTED_OPERATION));
 
@@ -709,39 +709,39 @@ static int getPrimitiveDurationFromSysfs(uint32_t primitive_id, int32_t* duratio
 
     ret = snprintf(primitive_duration_sysfs, sizeof(primitive_duration_sysfs), "%s%s", HAPTICS_SYSFS, "/primitive_duration");
     if (ret < 0) {
-        ALOGE("Failed to get primitive duration node, ret = %d\n", ret);
+        //ALOGE("Failed to get primitive duration node, ret = %d\n", ret);
         return ret;
     }
 
     count = snprintf(primitive_buf, sizeof(primitive_buf), "%d%c", primitive_id, '\n');
     if (count < 0) {
-        ALOGE("Failed to get primitive id, count = %d\n", count);
+        //ALOGE("Failed to get primitive id, count = %d\n", count);
         ret = count;
         return ret;
     }
 
     fd = TEMP_FAILURE_RETRY(open(primitive_duration_sysfs, O_RDWR));
     if (fd < 0) {
-        ALOGE("open %s failed, errno = %d", primitive_duration_sysfs, errno);
+        //ALOGE("open %s failed, errno = %d", primitive_duration_sysfs, errno);
         ret = fd;
         return ret;
     }
 
     ret = TEMP_FAILURE_RETRY(write(fd, primitive_buf, count));
     if (ret < 0) {
-        ALOGE("write primitive %d failed, errno = %d", primitive_id, errno);
+        //ALOGE("write primitive %d failed, errno = %d", primitive_id, errno);
         goto close_fd;
     }
 
     ret = TEMP_FAILURE_RETRY(lseek(fd, 0, SEEK_SET));
     if (ret < 0) {
-        ALOGE("lseek fd to file head failed, errno = %d", errno);
+        //ALOGE("lseek fd to file head failed, errno = %d", errno);
         goto close_fd;
     }
 
     ret = TEMP_FAILURE_RETRY(read(fd, primitive_duration, sizeof(primitive_duration)));
     if (ret < 0) {
-        ALOGE("read primitive %d failed, errno = %d", primitive_id, errno);
+        //ALOGE("read primitive %d failed, errno = %d", primitive_id, errno);
         goto close_fd;
     }
 
@@ -751,7 +751,7 @@ static int getPrimitiveDurationFromSysfs(uint32_t primitive_id, int32_t* duratio
 close_fd:
     ret = TEMP_FAILURE_RETRY(close(fd));
     if (ret < 0) {
-        ALOGE("close primitive duration device failed, errno = %d", errno);
+        //ALOGE("close primitive duration device failed, errno = %d", errno);
         return ret;
     }
 
@@ -770,7 +770,7 @@ ndk::ScopedAStatus Vibrator::getPrimitiveDuration(CompositePrimitive primitive,
     if (stream != NULL && stream->play_rate_hz != 0)
         *durationMs = ((stream->length * 1000) / stream->play_rate_hz) + 1;
 
-    ALOGD("primitive-%d duration is %dms", primitive, *durationMs);
+    //ALOGD("primitive-%d duration is %dms", primitive, *durationMs);
     return ndk::ScopedAStatus::ok();
 #endif
 
@@ -778,7 +778,7 @@ ndk::ScopedAStatus Vibrator::getPrimitiveDuration(CompositePrimitive primitive,
     if (ret < 0)
         return ndk::ScopedAStatus::fromExceptionCode(EX_UNSUPPORTED_OPERATION);
 
-    ALOGD("primitive-%d duration is %dms", primitive, *durationMs);
+    //ALOGD("primitive-%d duration is %dms", primitive, *durationMs);
 
     return ndk::ScopedAStatus::ok();
 }
@@ -792,12 +792,12 @@ void Vibrator::composePlayThread(Vibrator *vibrator,
     int status = 0;
     int ret = 0;
 
-    ALOGD("start a new thread for composeEffect");
+    //ALOGD("start a new thread for composeEffect");
     for (auto& e : composite) {
         if (e.delayMs) {
             nfd = epoll_wait(vibrator->epollfd, &events, 1, e.delayMs);
             if ((nfd == -1) && (errno != EINTR)) {
-                ALOGE("Failed to wait delayMs, error=%d", errno);
+                //ALOGE("Failed to wait delayMs, error=%d", errno);
                 break;
             }
 
@@ -805,7 +805,7 @@ void Vibrator::composePlayThread(Vibrator *vibrator,
                 /* It's supposed that STOP_COMPOSE command is received so quit the composition */
                 ret = read(vibrator->pipefd[0], &status, sizeof(int));
                 if (ret < 0) {
-                    ALOGE("Failed to read stop status from pipe(delayMs), status = %d", status);
+                    //ALOGE("Failed to read stop status from pipe(delayMs), status = %d", status);
                     break;
                 }
                 if (status == STOP_COMPOSE)
@@ -816,7 +816,7 @@ void Vibrator::composePlayThread(Vibrator *vibrator,
         vibrator->ff.playPrimitive((static_cast<int>(e.primitive)), e.scale, &playLengthMs);
         nfd = epoll_wait(vibrator->epollfd, &events, 1, playLengthMs);
         if (nfd == -1 && (errno != EINTR)) {
-            ALOGE("Failed to wait sleep playLengthMs, error=%d", errno);
+            //ALOGE("Failed to wait sleep playLengthMs, error=%d", errno);
             break;
         }
 
@@ -824,7 +824,7 @@ void Vibrator::composePlayThread(Vibrator *vibrator,
             /* It's supposed that STOP_COMPOSE command is received so quit the composition */
             ret = read(vibrator->pipefd[0], &status, sizeof(int));
             if (ret < 0) {
-                ALOGE("Failed to read stop status from pipe(playLengthMs), status = %d", status);
+                //ALOGE("Failed to read stop status from pipe(playLengthMs), status = %d", status);
                 break;
             }
             if (status == STOP_COMPOSE)
@@ -832,7 +832,7 @@ void Vibrator::composePlayThread(Vibrator *vibrator,
         }
     }
 
-    ALOGD("Notifying composite complete, playlength= %ld", playLengthMs);
+    //ALOGD("Notifying composite complete, playlength= %ld", playLengthMs);
     if (callback)
         callback->onComplete();
 
@@ -873,21 +873,21 @@ ndk::ScopedAStatus Vibrator::compose(const std::vector<CompositeEffect>& composi
     timeoutMs = (timeoutMs + 10) * 2;
     /* Stop previous composition if it has not yet been completed */
     if (inComposition) {
-        ALOGD("Last composePlayThread has not done yet, stop it manually");
+        //ALOGD("Last composePlayThread has not done yet, stop it manually");
         off();
 
         while (inComposition && timeoutMs--)
             usleep(1000);
 
         if (timeoutMs == 0) {
-            ALOGE("wait for last composePlayThread done timeout");
+            //ALOGE("wait for last composePlayThread done timeout");
             return ndk::ScopedAStatus::fromExceptionCode(EX_SERVICE_SPECIFIC);
         }
 
         /* Read the pipe again to remove any stale data before triggering a new play */
         nfd = epoll_wait(epollfd, &events, 1, 0);
         if (nfd == -1 && (errno != EINTR)) {
-            ALOGE("Failed to wait sleep playLengthMs, error=%d", errno);
+            //ALOGE("Failed to wait sleep playLengthMs, error=%d", errno);
             return ndk::ScopedAStatus::fromExceptionCode(EX_SERVICE_SPECIFIC);
         }
         if (nfd > 0)
@@ -898,7 +898,7 @@ ndk::ScopedAStatus Vibrator::compose(const std::vector<CompositeEffect>& composi
     composeThread = std::thread(composePlayThread, this, composite, callback);
     composeThread.detach();
 
-    ALOGD("trigger composition successfully");
+    //ALOGD("trigger composition successfully");
     return ndk::ScopedAStatus::ok();
 }
 
